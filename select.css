@@ -1,0 +1,26 @@
+.container {
+    width:70%;
+    margin: 0 auto;
+}
+
+div {
+    padding:10px 0;
+    font-size: 16px;
+}
+
+.badge {
+    color: #fff;
+    background-color: #007bff;
+    margin-right: 10px;
+}
+
+.task {
+    font-weight: bold;
+}
+
+.deadline {
+    display: inline-block;
+    margin-left: 10px;
+    color:#afafaf;
+    font-size: 14px;
+}
