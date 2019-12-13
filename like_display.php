@@ -1,10 +1,13 @@
 <?php
 include('functions.php');
+session_start();
+checkSessionId();
 
-$user_id = $_GET['id'];
+$user_id = $_SESSION['user_id'];
+$user_name = $_SESSION['user_name'];
 
 $swt = 'default';
-if(isset($_GET['s'])){
+if (isset($_GET['s'])) {
     $swt = $_GET['s'];
 }
 
@@ -21,25 +24,19 @@ INNER JOIN (SELECT task_id FROM like_table WHERE user_id = 1)  AS userSelected
 ON php02_table.id = userSelected.task_id
 ORDER BY cnt DESC;
 */
+$sql = 'SELECT * FROM php02_table 
+        INNER JOIN (SELECT task_id, COUNT(*) AS cnt 
+        FROM like_table GROUP BY task_id) AS likes
+        ON php02_table.id = likes.task_id 
+        INNER JOIN (SELECT task_id FROM like_table WHERE user_id = :a1)  AS userSelected
+        ON php02_table.id = userSelected.task_id';
 
-switch($swt){
+switch ($swt) {
     case 'likes_num':
-        $sql =  'SELECT * FROM php02_table 
-                INNER JOIN (SELECT task_id, COUNT(*) AS cnt 
-                FROM like_table GROUP BY task_id) AS likes
-                ON php02_table.id = likes.task_id 
-                INNER JOIN (SELECT task_id FROM like_table WHERE user_id = :a1)  AS userSelected
-                ON php02_table.id = userSelected.task_id
-                ORDER BY cnt DESC';
+        $sql .=  ' ORDER BY cnt DESC'; //ORDER BY の前にスペースをいれる
         break;
 
     default:
-        $sql =  'SELECT * FROM php02_table 
-                INNER JOIN (SELECT task_id, COUNT(*) AS cnt 
-                FROM like_table GROUP BY task_id) AS likes
-                ON php02_table.id = likes.task_id 
-                INNER JOIN (SELECT task_id FROM like_table WHERE user_id = :a1)  AS userSelected
-                ON php02_table.id = userSelected.task_id';
         break;
 }
 
@@ -67,54 +64,54 @@ if ($status == false) {
 
 ?>
 
-<!DOCTYPE html>
-<html lang="ja">
+    <!DOCTYPE html>
+    <html lang="ja">
 
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>todoリスト表示</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
-    <link rel="stylesheet" href="select.css">
-</head>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>todoリスト表示</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+        <link rel="stylesheet" href="style.css">
+    </head>
 
-<body>
+    <body>
 
-    <header>
-        <nav class="navbar navbar-expand-lg navbar-light bg-light">
-            <a class="navbar-brand" href="#">Todo一覧</a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
+        <header>
+            <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                <a class="navbar-brand" href="#">Todo一覧</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" href="index.php">+ 新しいTodo</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="select.php">Todo一覧</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="like_display.php?id=<?= $user_id ?>">お気に入り</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link user" href="select.php">[ 現在のユーザー] <?= $user_id ?> , <?= $user_name ?></a>
+                        </li>
+
+                    </ul>
+                </div>
+            </nav>
+        </header>
+        <div class="container">
+            <div class="menu">
                 <ul class="navbar-nav">
-                    <li class="nav-item">
-                        <a class="nav-link" href="index.php">+ 新しいTodo</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="select.php">Todo一覧</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="like_display.php?id=<?= $user_id ?>">お気に入り</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link user" href="select.php">現在のユーザー：<?= $user_id ?></a>
-                    </li>
-
+                    <li><a href="like_display.php?id=<?= $user_id ?>&s=likes_num">LIKE数で並べ替え</a></li>
                 </ul>
             </div>
-        </nav>
-    </header>
-    <div class="container">
-        <div class="menu">
-            <ul class="navbar-nav">
-                <li><a href="like_display.php?id=<?= $user_id ?>&s=likes_num">LIKE数で並べ替え</a></li>
-            </ul>
+            <div><?= $view ?></div>
         </div>
-        <div><?= $view ?></div>
-    </div>
 
-</body>
+    </body>
 
-</html>
+    </html>

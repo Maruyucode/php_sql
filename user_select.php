@@ -1,15 +1,15 @@
 <?php
+
 include('functions.php');
 session_start();
 checkSessionId();
+checkAdmin();
 
 $menu = menu();
 
-// ログインしている場合は、issetでここの値を表示
-if(isset($_SESSION['user_id'])){
-  $user_id = $_SESSION['user_id'];
-  $user_name = $_SESSION['user_name'];
-}
+// ユーザーidの指定（今回は固定値）
+$user_id = $_SESSION['user_id'];
+$user_name = $_SESSION['user_name'];
 
 /*
 SELECT * FROM php02_table WHERE task LIKE '%task%'
@@ -19,11 +19,7 @@ SELECT * FROM php02_table WHERE task LIKE '%task%'
 $pdo = connectToDb();
 
 //データ表示SQL作成
-// $sql = 'SELECT * FROM php02_table';
-$sql = 'SELECT * FROM php02_table 
-        LEFT OUTER JOIN (SELECT task_id, COUNT(id) AS cnt 
-        FROM like_table GROUP BY task_id) AS likes
-        ON php02_table.id = likes.task_id';
+$sql = 'SELECT * FROM user_table';
 $stmt = $pdo->prepare($sql);
 $status = $stmt->execute();   //SELECTで取得したデータは$stmtが持ってる
 
@@ -32,14 +28,14 @@ $view = '';
 if ($status == false) {
   showSqlErrorMsg($stmt);
 } else {
+  //HTMLに表示
   while ($result = $stmt->fetch(PDO::FETCH_ASSOC)) {
     $view .= '<li class="list-group-item">';
-    $view .= '<div><span class="task">' . $result['task'] . '</span>' . '<span class="deadline">' . $result['deadline'] . '</span></div>';
-    $view .= '<div>' . $result['comment'] . '</div>';
-    // いいねボタン
-    $view .= '<a href="like_insert.php?task_id=' . $result['id'] . '&user_id=' . $user_id . '" class="badge badge-primary">LIKE' . $result['cnt'] . '</a>';
-    $view .= '<a href="detail.php?id=' . $result['id'] . '" class="badge badge-primary">Edit</a>';
-    $view .= '<a href="delete.php?id=' . $result['id'] . '" class="badge badge-danger">Delete</a>';
+    $view .= '<div><span class="task">' . $result['name'] . '</span>' . '<span class="deadline">' . $result['id'] . '</span></div>';
+    $view .= '<div>' . $result['lid'] . '</div>';
+    $view .= '<div>' . $result['lpw'] . '</div>';
+    $view .= '<a href="user_detail.php?id=' . $result['id'] . '" class="badge badge-primary">Edit</a>';
+    //$view .= '<a href="user_delete.php?id=' . $result['id'] . '" class="badge badge-danger">Delete</a>';
     $view .= '</li>';
   }
 }
@@ -55,7 +51,7 @@ $admin = admin($_SESSION['kanri_flg']);
 $header_str = '';
 if ($admin) {
   $header_str .= '<li class="nav-item">';
-  $header_str .= '<a class="nav-link" href="user_select.php">user管理</a>';
+  $header_str .= '<a class="nav-link" href="user_detail.php">user管理</a>';
   $header_str .= '</li>';
 }
 
@@ -70,7 +66,7 @@ if ($admin) {
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>todoリスト表示</title>
+  <title>user管理</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
   <link rel="stylesheet" href="style.css">
 </head>
@@ -78,7 +74,7 @@ if ($admin) {
 <body>
   <header>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-      <a class="navbar-brand" href="#">Todo一覧</a>
+      <a class="navbar-brand" href="#">user管理</a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -95,7 +91,7 @@ if ($admin) {
           </li>
           <?= $menu ?>
           <li class="nav-item">
-            <a class="nav-link user" href="my_profile.php?id=<?= $user_id ?>">[ 現在のユーザー] <?= $user_id ?> , <?= $user_name ?></a>
+            <a class="nav-link user" href="user_detail.php?id=<?= $user_id ?>">[ 現在のユーザー] <?= $user_id ?> , <?= $user_name ?></a>
           </li>
           <?= $header_str ?>
         </ul>
@@ -104,10 +100,10 @@ if ($admin) {
   </header>
 
   <div class="container">
-    <form action="search.php" method="get">
+    <form action="search_user.php" method="get">
       <!-- 任意の<input>要素＝入力欄などを用意する -->
       <input type="text" name="search">
-      <button type="submit" class="btn btn-primary">タスクを検索</button>
+      <button type="submit" class="btn btn-primary">ユーザー名を検索</button>
     </form>
     <div>
       <ul class="list-group">

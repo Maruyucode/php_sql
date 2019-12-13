@@ -16,12 +16,7 @@ $pdo = connectToDb();
 SELECT * FROM php02_table WHERE task LIKE '%task%'
 */
 
-$sql = "SELECT * FROM php02_table 
-        LEFT OUTER JOIN (SELECT task_id, COUNT(id) AS cnt 
-        FROM like_table GROUP BY task_id) AS likes
-        ON php02_table.id = likes.task_id
-        WHERE task LIKE '%$word%'";
-//"SELECT * FROM php02_table WHERE task LIKE '%:a1%'";
+$sql = "SELECT * FROM user_table WHERE name LIKE '%$word%'";
 $stmt = $pdo->prepare($sql);
 $status = $stmt->execute();
 
@@ -33,13 +28,11 @@ if ($status == false) {
     while ($result = $stmt->fetch(PDO::FETCH_ASSOC)) {
         //$view .= '<P>' . $result['id'] . $result['task'] . '</p>';
         $view .= '<li class="list-group-item">';
-        $view .= '<div><span class="task">' . $result['task'] . '</span>' . '<span class="deadline">' . $result['deadline'] . '</span></div>';
-        $view .= '<div>' . $result['comment'] . '</div>';
-        // いいねボタン
-        // user_id は自分のid
-        $view .= '<a href="like_insert.php?task_id=' . $result['id'] . '&user_id=' . $user_id . '" class="badge badge-primary">LIKE' . $result['cnt'] . '</a>';
-        $view .= '<a href="detail.php?id=' . $result['id'] . '" class="badge badge-primary">Edit</a>';
-        $view .= '<a href="delete.php?id=' . $result['id'] . '" class="badge badge-danger">Delete</a>';
+        $view .= '<div><span class="task">' . $result['name'] . '</span>' . '<span class="deadline">' . $result['id'] . '</span></div>';
+        $view .= '<div>' . $result['lid'] . '</div>';
+        $view .= '<div>' . $result['lpw'] . '</div>';
+        $view .= '<a href="user_detail.php?id=' . $result['id'] . '" class="badge badge-primary">Edit</a>';
+        //$view .= '<a href="user_delete.php?id=' . $result['id'] . '" class="badge badge-danger">Delete</a>';
         $view .= '</li>';
     }
 }

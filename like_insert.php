@@ -2,6 +2,8 @@
 
 // 関数ファイルの読み込み
 include('functions.php');
+session_start();
+checkSessionId();
 
 // GETデータ取得
 // select.phpにあるlikeボタンのhrefにuser_idとtask_idを記述し、こちらの$_GETでとる

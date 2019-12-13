@@ -1,15 +1,13 @@
 <?php
 include('functions.php');
 session_start();
-checkSessionId();
+//checkSessionId();
 
 $menu = menu();
 
-// ログインしている場合は、issetでここの値を表示
-if(isset($_SESSION['user_id'])){
-  $user_id = $_SESSION['user_id'];
-  $user_name = $_SESSION['user_name'];
-}
+// ユーザーidの指定（今回は固定値）
+// $user_id = $_SESSION['user_id'];
+// $user_name = $_SESSION['user_name'];
 
 /*
 SELECT * FROM php02_table WHERE task LIKE '%task%'
@@ -17,6 +15,17 @@ SELECT * FROM php02_table WHERE task LIKE '%task%'
 
 //DB接続
 $pdo = connectToDb();
+
+// // taskごとのいいね数カウント確認
+// $sql = 'SELECT task_id, COUNT(id) AS cnt FROM like_table GROUP BY task_id';
+// $stmt = $pdo->prepare($sql);
+// $status = $stmt->execute();
+// if ($status == false) {
+//   showSqlErrorMsg($stmt);
+// } else {
+//   $result = $stmt->fetchAll();
+//   var_dump(($result));
+// }
 
 //データ表示SQL作成
 // $sql = 'SELECT * FROM php02_table';
@@ -37,7 +46,7 @@ if ($status == false) {
     $view .= '<div><span class="task">' . $result['task'] . '</span>' . '<span class="deadline">' . $result['deadline'] . '</span></div>';
     $view .= '<div>' . $result['comment'] . '</div>';
     // いいねボタン
-    $view .= '<a href="like_insert.php?task_id=' . $result['id'] . '&user_id=' . $user_id . '" class="badge badge-primary">LIKE' . $result['cnt'] . '</a>';
+    $view .= '<a href="like_insert.php?task_id=' . $result['id'] . '" class="badge badge-primary">LIKE' . $result['cnt'] . '</a>';
     $view .= '<a href="detail.php?id=' . $result['id'] . '" class="badge badge-primary">Edit</a>';
     $view .= '<a href="delete.php?id=' . $result['id'] . '" class="badge badge-danger">Delete</a>';
     $view .= '</li>';
@@ -50,14 +59,6 @@ fetch()はテーブルから１行(1record)1ずつ取り出すという関数
 fetchで取得した１レコードのデータが$resultに配列として代入される
 $resultに配列が代入されるまで、つまりレコードの数だけwhile文がまわる、と
 */
-
-$admin = admin($_SESSION['kanri_flg']);
-$header_str = '';
-if ($admin) {
-  $header_str .= '<li class="nav-item">';
-  $header_str .= '<a class="nav-link" href="user_select.php">user管理</a>';
-  $header_str .= '</li>';
-}
 
 ?>
 
@@ -94,10 +95,6 @@ if ($admin) {
             <a class="nav-link" href="like_display.php?id=<?= $user_id ?>">お気に入り</a>
           </li>
           <?= $menu ?>
-          <li class="nav-item">
-            <a class="nav-link user" href="my_profile.php?id=<?= $user_id ?>">[ 現在のユーザー] <?= $user_id ?> , <?= $user_name ?></a>
-          </li>
-          <?= $header_str ?>
         </ul>
       </div>
     </nav>

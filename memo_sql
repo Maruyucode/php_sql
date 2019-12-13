@@ -1,2 +1,4 @@
 
 INSERT INTO `user_table` (`id`, `name`, `lib`, `lpw`, `kanri_flg`, `life_flg`) VALUES (NULL, 'test01', 'test01', '123456', '1', '0');
+
+INSERT INTO user_table VALUES ( NULL, 'name02', 'name02','qwerty',0,0);

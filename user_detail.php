@@ -2,15 +2,19 @@
 include('functions.php');
 session_start();
 checkSessionId();
+checkAdmin();
+
+//echo $_SERVER["REQUEST_URI"];
 
 // getで送信されたidを取得
 $id = $_GET['id'];
+$_SESSION['target_user_id'] = $_GET['id'];
 
 //DB接続します
 $pdo = connectToDb();
 
 //データ登録SQL作成，指定したidのみ表示する
-$sql = 'SELECT * FROM php02_table WHERE id=:id';
+$sql = 'SELECT * FROM user_table WHERE id=:id';
 $stmt = $pdo->prepare($sql);
 $stmt->bindValue(':id', $id, PDO::PARAM_INT);
 $status = $stmt->execute();
@@ -22,10 +26,9 @@ if ($status == false) {
 } else {
   // エラーでないとき
   $rs = $stmt->fetch();
-  // fetch()で1レコードを取得して$rsに入れる
-  // $rsは配列で返ってくる．$rs["id"], $rs["task"]などで値をとれる
-  // var_dump()で見てみよう
+  $_SESSION['target_user_id'] = $id;
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -62,29 +65,45 @@ if ($status == false) {
   </header>
 
   <div class="container">
-    <form method="post" action="update.php">
+    <form method="post" action="user_update.php">
       <div class="form-group">
-        <label for="task">Task</label>
+        <div for="name">id: <?= $rs['id'] ?></div>
+      </div>
+      <div class="form-group">
+        <label for="name">Name</label>
         <!-- 受け取った値をvaluesに埋め込もう -->
-        <input type="text" class="form-control" id="task" name="task" placeholder="Enter task" value="<?= $rs['task'] ?>">
+        <input type="text" class="form-control" id="name" name="name" value="<?= $rs['name'] ?>">
       </div>
       <div class="form-group">
-        <label for="deadline">Deadline</label>
+        <label for="lid">lid</label>
         <!-- 受け取った値をvaluesに埋め込もう -->
-        <input type="date" class="form-control" id="deadline" name="deadline" value="<?= $rs['deadline'] ?>">
+        <input type="text" class="form-control" id="lid" name="lid" value="<?= $rs['lid'] ?>">
       </div>
       <div class="form-group">
-        <label for="comment">Comment</label>
-        <!-- 受け取った値挿入しよう -->
-        <textarea class="form-control" id="comment" name="comment" rows="3"><?= $rs['comment'] ?></textarea>
+        <label for="lpw">lpw</label>
+        <!-- 受け取った値をvaluesに埋め込もう -->
+        <input type="text" class="form-control" id="lpw" name="lpw" value="<?= $rs['lpw'] ?>">
       </div>
+      <div class="form-group">
+        <label for="kanri_flg">kanri_flg</label>
+        <input type="text" class="form-control" id="kanri_flg" name="kanri_flg" value="<?= $rs['kanri_flg'] ?>">
+      </div>
+      <div class="form-group">
+        <label for="life_flg">life_flg</label>
+        <input type="text" class="form-control" id="life_flg" name="life_flg" value="<?= $rs['life_flg'] ?>">
+      </div>
+
       <div class="form-group">
         <button type="submit" class="btn btn-primary">Submit</button>
       </div>
-      <!-- idは変えたくない = ユーザーから見えないようにする-->
-      <input type="hidden" name="id" value="<?= $rs['id'] ?>">
+
+      <div>
+        <a href="unsubscribe.php?id=<?= $id ?>" class="badge badge-danger">このユーザーアカウントを凍結する</a>
+        <a href="user_delete.php?id=<?= $id ?>" class="badge badge-danger">このユーザーアカウントを削除する</a>
+      </div>
     </form>
   </div>
+
 </body>
 
 </html>

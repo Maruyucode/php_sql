@@ -3,6 +3,11 @@
     margin: 0 auto;
 }
 
+.login{
+    width: 400px;
+    margin: 0 auto;
+}
+
 div {
     padding:10px 0;
     font-size: 16px;
@@ -23,4 +28,8 @@ div {
     margin-left: 10px;
     color:#afafaf;
     font-size: 14px;
+}
+
+.errorMsg {
+    color: red;
 }
